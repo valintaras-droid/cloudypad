@@ -27,9 +27,8 @@ jobs:
 
       - name: Install Cloudypad
         run: |
-          pip install pipx
-          pipx install cloudypad --pipargs "--pre"
-          echo "/root/.local/bin" >> $GITHUB_PATH
+          python -m pip install --upgrade pip
+          pip install cloudypad
 
       - name: Authenticate and Launch
         env:
@@ -38,5 +37,5 @@ jobs:
         run: |
           pip install modal
           modal token set --token-id $MODAL_TOKEN_ID --token-secret $MODAL_TOKEN_SECRET
-          ~/.local/bin/cloudypad create --provider modal --region paris --storage ${{ github.event.inputs.Storage }}
+          cloudypad create --provider modal --region paris --storage ${{ github.event.inputs.Storage }}
           
