@@ -1,0 +1,42 @@
+name: Deploy to Modal
+on:
+  workflow_dispatch:
+    inputs:
+      MODAL_TOKEN_ID:
+        description: 'Modal Token ID (ak-xxxx)'
+        required: true
+      MODAL_TOKEN_SECRET:
+        description: 'Modal Token Secret (as-xxxx)'
+        required: true
+      Storage:
+        description: 'Storage size in GB'
+        required: true
+        default: '150'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Cloudypad
+        run: |
+          pip install pipx
+          pipx install cloudypad --pipargs "--pre"
+          echo "/root/.local/bin" >> $GITHUB_PATH
+
+      - name: Authenticate and Launch
+        env:
+          MODAL_TOKEN_ID: ${{ github.event.inputs.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ github.event.inputs.MODAL_TOKEN_SECRET }}
+        run: |
+          pip install modal
+          modal token set --token-id $MODAL_TOKEN_ID --token-secret $MODAL_TOKEN_SECRET
+          ~/.local/bin/cloudypad create --provider modal --region paris --storage ${{ github.event.inputs.Storage }}
+          
